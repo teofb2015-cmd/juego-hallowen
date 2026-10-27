@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria Halloween</title>
+    <style>
+        body {
+            font-family: 
+'Arial Rounded MT Bold', Arial, sans-serif;
+            background-color: #2b1055;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #ff9900;
+            margin: 5px 0;
+            font-size: 26px;
+            text-shadow: 2px 2px #000;
+            text-align: center;
+        }
+        .stats {
+            font-size: 18px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid #ff9900;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+        .card {
+            aspect-ratio: 1;
+            background-color: #ff9900;
+            border: 3px solid #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: transparent;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .card:active {
+            transform: scale(0.95);
+        }
+        .card.flipped {
+            background-color: #4a235a;
+            border-color: #ff9900;
+            color: #fff;
+        }
+        .card.matched {
+            background-color: #196f3d;
+            border-color: #2ecc71;
+            color: #fff;
+        }
+        .btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px #000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎃 Memory de Halloween 👻</h1>
+    <div class="stats">Parejas: <span id="matches">0</span> / 18</div>
+    <div class="grid" id="grid"></div>
+    <button class="btn" onclick="resetGame()">🔄 Mezclar y Reiniciar</button>
+
+    <script>
+        // 18 emojis divertidos de Halloween (sin asustar) para niños de 5 años
+        const halloweenEmojis = [
+            '🎃', '👻', '🍬', '🐈‍⬛', '🦇', '🦉', '🧙‍♂️', '🧛', '🧟', 
+            '🕷️', '🕸️', '🍭', '🍫', '🕯️', '🔮', '🌕', '🎭', '🌽'
+        ];
+        
+        let cards = [...halloweenEmojis, ...halloweenEmojis];
+        let flippedCards = [];
+        let matchedCards = [];
+        let canFlip = true;
+        let matchCount = 0;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            shuffle(cards);
+            cards.forEach((emoji) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.emoji = emoji;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (!canFlip || this.classList.contains('flipped') || this.classList.contains('matched')) return;
+
+            this.classList.add('flipped');
+            this.textContent = this.dataset.emoji;
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            canFlip = false;
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedCards.push(card1, card2);
+                matchCount++;
+                document.getElementById('matches').textContent = matchCount;
+                flippedCards = [];
+                canFlip = true;
+                
+                if (matchedCards.length === cards.length) {
+                    setTimeout(() => alert('¡🎉 Enhorabuena! ¡Habéis encontrado todas las parejas de Halloween! 🎃'), 300);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '';
+                    card2.textContent = '';
+                    flippedCards = [];
+                    canFlip = true;
+                }, 1000);
+            }
+        }
+
+        function resetGame() {
+            flippedCards = [];
+            matchedCards = [];
+            matchCount = 0;
+            document.getElementById('matches').textContent = matchCount;
+            canFlip = true;
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
